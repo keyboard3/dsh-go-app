@@ -6,7 +6,13 @@
 
 ## 安装插件
 
-当前插件接口针对 DSH Go 1.0.13 自带的 DeepSeek Harness `0.2.2-rc.1`，需要 Node.js 24.9 或更新版本。用源码打包，然后在 DSH Go 的本机终端里安装。若在电脑打包，先把 `.tgz` 文件传到手机。
+当前插件接口针对 DSH Go 1.0.13 自带的 DeepSeek Harness `0.2.2-rc.1`，需要 Node.js 24.9 或更新版本。在 DSH Go 的本机终端安装发布版本。
+
+```sh
+dsh plugin --profile web add dsh-go-app@0.1.0
+```
+
+开发版可从源码打包安装。若在电脑打包，先把 `.tgz` 文件传到手机。
 
 ```sh
 npm pack
@@ -17,18 +23,30 @@ dsh plugin --profile web add /absolute/path/to/dsh-go-app-0.1.0.tgz
 
 ## 配置构建环境
 
-先准备能在构建机上运行的 JDK 17 或更新版本、Android API 34 的 `android.jar`、`aapt2`、`zipalign`、`d8.jar` 和 `apksigner.jar`。在 ARM64 手机的 PRoot 环境里，`aapt2` 和 `zipalign` 必须能在 ARM64 Linux 上运行。Java 工具使用同一份 JDK。
+DSH Go 的 ARM64 PRoot 环境如果使用 glibc 2.38 或更新版本，可以在第一次确认构建时自动配置。请使用能显示审批提示的会话权限，例如「工作区内修改」。确认框会提示下载缺少的工具并接受 [Android SDK 许可](https://developer.android.com/studio/terms)。
 
-在 DSH Go 终端里运行下列命令。将 `PLUGIN` 改成插件的安装路径，并将参数替换成环境里实际的绝对路径。默认 DSH Home 是 `~/.dsh`。
+插件会复用已有的 JDK 和 SDK，从固定的上游地址补齐缺少的组件。空环境首次下载约 330 MB。安装前验证下载大小和 SHA-256，试编译并验证一个临时 APK 后保存配置。以后构建复用已配置的工具。[工具链清单](lib/toolchain-sources.json)
+
+也可以在 DSH Go 终端提前配置。默认 DSH Home 是 `~/.dsh`，如果你的安装位置不同，请调整 `PLUGIN`。
 
 ```sh
 PLUGIN="${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/dsh-go-app"
-node "$PLUGIN/bin/dsh-go-app.js" configure \
-  /path/to/jdk /path/to/build-tools-bin /path/to/android.jar /path/to/tool-jars
+node "$PLUGIN/bin/dsh-go-app.js" setup --accept-android-sdk-license
 node "$PLUGIN/bin/dsh-go-app.js" doctor
 ```
 
+已有工具链时，可用 `configure` 指定实际路径。需要 JDK 17 或更新版本、Android API 34 的 `android.jar`、本机架构的 `aapt2` 和 `zipalign`，以及 `d8.jar` 和 `apksigner.jar`。
+
+```sh
+node "$PLUGIN/bin/dsh-go-app.js" configure \
+  /path/to/jdk /path/to/build-tools-bin /path/to/android.jar /path/to/tool-jars
+```
+
 标准桌面 SDK 布局也可通过 `JAVA_HOME` 和 `ANDROID_HOME` 定位 Build Tools 34.0.0 及 API 34。配置和本地签名密钥保存在 `~/.local/share/dsh-go-app/`，可用 `DSH_GO_APP_HOME` 指定目录。
+
+## 查阅 Android API
+
+`dsh_app_android_docs` 先从 `developer.android.com` 读取 API 参考。访问失败或正文缺少目标声明时，再尝试 `developer.android.google.cn` 的同路径和锚点，并返回实际来源。为插件项目传入 `projectId`，可以用当前构建 SDK 的 `android.jar` 核对平台 API 签名。AndroidX 用法按项目解析出的依赖版本核对，权限和运行条件查对应的官方文档。
 
 ## 从想法到 APK
 
@@ -39,4 +57,4 @@ node "$PLUGIN/bin/dsh-go-app.js" doctor
 3. 确认打包后，插件检查页面与预览的 SHA-256 一致，构建并验证 APK。Harness 返回 APK 文件链接，有 `present` 时也交付文件卡。打开 APK 后，在 Android 安装器确认安装。
 4. 要更新应用，继续使用原项目。保留 `app.json`、`dist/` 和原签名密钥，插件会递增版本号并使用同一包名和签名，支持覆盖安装。
 
-第一版使用 Android Activity 和 WebView 运行单文件 HTML、CSS、JavaScript，支持 `localStorage`。工具链需要预先配置。GPS、Health Connect、通用 Gradle 项目和自动设备测试属于后续能力。生成 APK 使用本地开发签名，适合直接安装试用。
+第一版使用 Android Activity 和 WebView 运行单文件 HTML、CSS、JavaScript，支持 `localStorage`。GPS、Health Connect、通用 Gradle 项目和自动设备测试属于后续能力。生成 APK 使用本地开发签名，适合直接安装试用。

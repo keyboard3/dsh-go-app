@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-import { buildApk, configureToolchain, loadToolchain } from '../lib/android.js'
+import { buildApk, configureToolchain } from '../lib/android.js'
 import { createPreviewManager, createProject, readProject } from '../lib/project.js'
+import { inspectToolchain, setupToolchain } from '../lib/setup.js'
 
 const help = `dsh-go-app doctor
+dsh-go-app setup --accept-android-sdk-license
 dsh-go-app configure JAVA_HOME SDK_TOOLS ANDROID_JAR TOOL_JARS
 dsh-go-app create PROJECT_ID "App name"
 dsh-go-app preview PROJECT_ID
@@ -14,8 +16,14 @@ async function main() {
   switch (command) {
     case 'doctor':
       if (args.length === 0) {
-        await loadToolchain()
+        const { ready, detail } = await inspectToolchain()
+        if (!ready) throw new Error(detail)
         return { ready: true }
+      }
+      break
+    case 'setup':
+      if (args.length === 0 || (args.length === 1 && args[0] === '--accept-android-sdk-license')) {
+        return setupToolchain({ acceptAndroidSdkLicense: args.length === 1 })
       }
       break
     case 'configure':

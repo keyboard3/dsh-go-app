@@ -1,0 +1,43 @@
+{
+  "linux-arm64": {
+    "minimumGlibc": "2.38",
+    "components": {
+      "javaHome": {
+        "name": "Eclipse Temurin JDK 17.0.21+9",
+        "url": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.21%2B9/OpenJDK17U-jdk_aarch64_linux_hotspot_17.0.21_9.tar.gz",
+        "bytes": 192336814,
+        "sha256": "3e4eca7ead088f080af1476007decf010a240a1eb4e1e78c54fa32fbcc347084",
+        "format": "tar.gz",
+        "stripComponents": 1,
+        "path": "."
+      },
+      "sdkTools": {
+        "name": "ADT Linux ARM64 35.0.2",
+        "url": "https://github.com/soobujmiah/adt/releases/download/v35.0.2/android-sdk-linux-arm64-v35.0.2.tar.gz",
+        "bytes": 13064136,
+        "sha256": "79f03a7bca57bd421baa20ca4da086aca8f2b857581e8fa403e7651c16bc5502",
+        "format": "tar.gz",
+        "entries": ["bin/aapt2", "bin/zipalign"],
+        "path": "bin"
+      },
+      "androidJar": {
+        "name": "Android SDK Platform 34 (extension 7, revision 3)",
+        "url": "https://dl.google.com/android/repository/platform-34-ext7_r03.zip",
+        "bytes": 63180081,
+        "sha256": "16fdb74c55e59ae3ef52def135aec713508467bd56d7dabcd8c9be31fa8b20f3",
+        "format": "zip",
+        "entries": ["android-34/android.jar", "android-34/source.properties"],
+        "path": "android-34/android.jar"
+      },
+      "toolJars": {
+        "name": "Android SDK Build Tools 34.0.0 Java tools",
+        "url": "https://dl.google.com/android/repository/build-tools_r34-linux.zip",
+        "bytes": 61224257,
+        "sha256": "e858c4b60069d0431051b225d384413b1643e1289b00a4825aed347f25bd510f",
+        "format": "zip",
+        "entries": ["android-14/lib/d8.jar", "android-14/lib/apksigner.jar", "android-14/NOTICE.txt", "android-14/source.properties"],
+        "path": "android-14/lib"
+      }
+    }
+  }
+}
