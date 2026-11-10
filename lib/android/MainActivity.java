@@ -12,8 +12,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Collections;
 
-public final class MainActivity extends Activity {
-    private static final String PAGE = "https://appassets.androidplatform.net/index.html";
+public class MainActivity extends Activity {
+    static final String PAGE_ORIGIN = "https://appassets.androidplatform.net";
+    private static final String PAGE = PAGE_ORIGIN + "/index.html";
     private static final String PAGE_POLICY =
         "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; "
         + "img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
@@ -29,16 +30,26 @@ public final class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        webView.setWebViewClient(new AppPageClient(getAssets()));
+        webView.setWebViewClient(new AppPageClient(this));
         setContentView(webView);
         webView.loadUrl(PAGE);
     }
 
+    String pagePolicy() {
+        return PAGE_POLICY;
+    }
+
+    WebResourceResponse localResource(WebResourceRequest request) {
+        return null;
+    }
+
     private static final class AppPageClient extends WebViewClient {
+        private final MainActivity activity;
         private final AssetManager assets;
 
-        AppPageClient(AssetManager assets) {
-            this.assets = assets;
+        AppPageClient(MainActivity activity) {
+            this.activity = activity;
+            this.assets = activity.getAssets();
         }
 
         @Override
@@ -51,11 +62,15 @@ public final class MainActivity extends Activity {
             if (request.isForMainFrame() && PAGE.equals(request.getUrl().toString())) {
                 try {
                     return new WebResourceResponse("text/html", "UTF-8", 200, "OK",
-                        Collections.singletonMap("Content-Security-Policy", PAGE_POLICY),
+                        Collections.singletonMap("Content-Security-Policy", activity.pagePolicy()),
                         assets.open("index.html"));
                 } catch (IOException unavailable) {
                     return emptyResponse(404, "Not Found");
                 }
+            }
+            if (!request.isForMainFrame()) {
+                WebResourceResponse resource = activity.localResource(request);
+                if (resource != null) return resource;
             }
             return emptyResponse(403, "Forbidden");
         }

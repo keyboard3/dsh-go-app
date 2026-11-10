@@ -38,10 +38,10 @@ async function main() {
     case 'preview':
       if (args.length === 1) {
         const preview = createPreviewManager()
-        const { url, sha256 } = await preview.open(await readProject(workspace, args[0]))
+        const { url, iconUrl, sha256 } = await preview.open(await readProject(workspace, args[0]))
         process.once('SIGINT', () => preview.close())
         process.once('SIGTERM', () => preview.close())
-        return { url, sha256 }
+        return { url, iconUrl, sha256 }
       }
       break
     case 'build':

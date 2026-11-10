@@ -2,7 +2,7 @@
 
 在 DeepSeek Harness 里创建一个可编辑的 Android App 项目，先用本机浏览器预览，再签名生成独立 APK。安装后，生成的 App 可以单独打开，离线运行。
 
-**开发预览 `0.1.0`**。已验证桌面 Harness 加载插件、签名构建，以及 Android 模拟器覆盖安装后保留应用数据。真机 DSH Go 的端到端流程待验证。
+**开发预览**。已验证桌面 Harness 加载插件和签名构建，以及 Android 模拟器覆盖安装后保留应用数据。另在一台 Android 16 真机上通过 DSH Go 完成了陀螺仪模板选择、页面生成、预览、签名、安装和实时采样。
 
 ## 安装插件
 
@@ -16,7 +16,7 @@ dsh plugin --profile web add dsh-go-app@0.1.0
 
 ```sh
 npm pack
-dsh plugin --profile web add /absolute/path/to/dsh-go-app-0.1.0.tgz
+dsh plugin --profile web add /absolute/path/to/dsh-go-app-0.1.1.tgz
 ```
 
 安装后重启 DSH Go 的本机引擎。安装方法见 [DSH Go 插件指南](https://github.com/ccch1mneyyy/dsh-Go/blob/v1.0.13/docs/plugins/from-zero.md)。
@@ -52,9 +52,11 @@ node "$PLUGIN/bin/dsh-go-app.js" configure \
 
 在有工作目录的 DSH Go 会话中输入「做一个能保存计数的 App。我看完预览，再打成 APK。」
 
-1. Harness 创建 `dsh-apps/<项目 ID>/`，并编辑其中的 `index.html`。
-2. 将预览链接复制到同一台设备的浏览器。预览服务只监听 `127.0.0.1`，链接有效期为 15 分钟。继续修改后重新预览。
-3. 确认打包后，插件检查页面与预览的 SHA-256 一致，构建并验证 APK。Harness 返回 APK 文件链接，有 `present` 时也交付文件卡。打开 APK 后，在 Android 安装器确认安装。
+1. Harness 先用 `dsh_app_doctor` 检查所需能力，再创建 `dsh-apps/<项目 ID>/`，生成 `index.html` 和桌面图标 `icon.json`。需要三轴陀螺仪时，声明 `gyroscope` 就会选中 `gyroscope-webview`，由 Android 原生读取角速度，WebView 显示数据。相机、定位和 Health Connect 等会列为当前模板不支持的能力。
+2. 在 Harness 聊天里点「打开应用预览」或「查看手机桌面效果」，看完后回复修改意见或确认打包。使用 DSH Go 的本机引擎时，请在这台手机上打开。链接有效期为 15 分钟，过期后回复「刷新预览」。陀螺仪的实时数据与硬件可用性可在目标设备安装 APK 后验证。
+3. 确认打包后，插件检查页面、图标和模板是否与预览一致，构建并验证 APK。如果当前会话禁止弹出审批，切换到「工作区内修改」等会显示审批提示的模式再试。有 `present` 时，在聊天里点 APK 文件卡打开 Android 安装器。其他客户端可使用返回的文件链接。
 4. 要更新应用，继续使用原项目。保留 `app.json`、`dist/` 和原签名密钥，插件会递增版本号并使用同一包名和签名，支持覆盖安装。
 
-第一版使用 Android Activity 和 WebView 运行单文件 HTML、CSS、JavaScript，支持 `localStorage`。GPS、Health Connect、通用 Gradle 项目和自动设备测试属于后续能力。生成 APK 使用本地开发签名，适合直接安装试用。
+桌面图标预览会在模拟手机壁纸上显示 App 名称和圆角图标，点图标即可打开同一版本的应用预览。图标会打包为 Android 自适应图标，最终轮廓由设备的启动器决定。旧项目可以在原目录补上 `icon.json`，再预览和打包。
+
+插件使用 Android Activity 和 WebView 运行单文件 HTML、CSS、JavaScript，支持 `localStorage`。陀螺仪模板在前台采样，通过页面同源的 `GET /gyroscope.json` 提供 X/Y/Z 角速度（rad/s）和开机后的采样时间。GPS、Health Connect、通用 Gradle 项目和自动设备测试属于后续能力。生成 APK 使用本地开发签名，适合直接安装试用。

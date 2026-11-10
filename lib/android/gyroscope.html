@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{APP_NAME}}</title>
+<style>
+  body { margin: 0; background: #f5f8f6; color: #19332b; font: 1rem system-ui, sans-serif; }
+  main { max-width: 32rem; margin: 2rem auto; padding: 1.5rem; }
+  h1 { margin: 0 0 1rem; }
+  p { line-height: 1.5; }
+  dl { padding: 1rem 1.25rem; border-radius: .75rem; background: white; }
+  dl div { display: flex; justify-content: space-between; align-items: baseline; padding: .6rem 0; }
+  dd { margin: 0; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+</style>
+<main>
+  <h1>{{APP_NAME}}</h1>
+  <p id="status" role="status">正在准备采样</p>
+  <dl aria-label="三轴角速度，单位弧度每秒">
+    <div><dt>X 轴</dt><dd id="x">—</dd></div>
+    <div><dt>Y 轴</dt><dd id="y">—</dd></div>
+    <div><dt>Z 轴</dt><dd id="z">—</dd></div>
+  </dl>
+  <p>角速度单位为 rad/s。转动手机，观察各轴的读数。</p>
+  <p id="timestamp"></p>
+</main>
+<script>
+  const status = document.getElementById('status')
+  const timestamp = document.getElementById('timestamp')
+  const axes = ['x', 'y', 'z']
+  const messages = {
+    active: '正在读取原生陀螺仪',
+    waiting: '正在等待陀螺仪数据',
+    inactive: '采样已暂停',
+    unavailable: '这台设备没有可用的陀螺仪',
+    error: '无法读取陀螺仪',
+  }
+
+  function render(sample) {
+    const message = messages[sample.status] || messages.error
+    if (status.textContent !== message) status.textContent = message
+    const active = sample.status === 'active'
+    for (const axis of axes) {
+      document.getElementById(axis).textContent = active ? sample[axis].toFixed(4) : '—'
+    }
+    timestamp.textContent = active ? '采样时间（开机后 ns）' + sample.timestampNanos : ''
+  }
+
+  async function refresh() {
+    try {
+      if (!document.hidden) {
+        const response = await fetch('/gyroscope.json', { cache: 'no-store' })
+        if (!response.ok) throw new Error('Sensor reading unavailable')
+        render(await response.json())
+      }
+    } catch {
+      render({ status: 'error' })
+    } finally {
+      setTimeout(refresh, 150)
+    }
+  }
+
+  if (location.origin === 'https://appassets.androidplatform.net') {
+    refresh()
+  } else {
+    status.textContent = '浏览器预览。安装 APK 后可读取真机数据。'
+  }
+</script>
+</html>

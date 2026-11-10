@@ -1,6 +1,6 @@
 {
   "name": "dsh-go-app",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Build standalone Android apps from a phone with DeepSeek Harness.",
   "license": "MIT",
   "type": "module",
