@@ -1,12 +1,40 @@
 # dsh-go-app
 
-在 DeepSeek Harness 里创建一个可编辑的 Android App 项目，先用本机浏览器预览，再签名生成独立 APK。安装后，生成的 App 可以单独打开，离线运行。
+`dsh-go-app` 是给 DSH Go 的 DeepSeek Harness 用的插件。把想做的 Android 应用告诉 Agent，先在手机上点图标预览，确认后生成签名 APK。装好的应用可以从手机桌面独立打开。
 
-**开发预览**。已验证桌面 Harness 加载插件和签名构建，以及 Android 模拟器覆盖安装后保留应用数据。另在一台 Android 16 真机上通过 DSH Go 完成了陀螺仪模板选择、页面生成、预览、签名、安装和实时采样。
+## 快速开始
+
+以下步骤适用于 DSH Go 1.0.13 的本机引擎（DeepSeek Harness `0.2.2-rc.1`，Node.js 24.9 或更新版本）。先在 DSH Go 完成本机引擎初始化并配置可用的模型。
+
+### 安装插件
+
+插件还在等待 DSH Go 市场收录，现阶段通过 npm 安装。[查看上架进度](https://github.com/ccch1mneyyy/dsh-go-market/pull/39)
+
+**让 Agent 安装。** 在 DSH Go 的本机聊天中发送下面这段话。若弹出命令执行或联网的确认，按提示批准。
+
+> 请在当前手机的 DSH Go 本机环境中执行 `dsh plugin --profile web add dsh-go-app@0.1.1`。安装完成后告诉我，我来重启本机引擎。
+
+**手动安装。** 如果 Agent 无法执行命令，打开 DSH Go 的本机终端，运行同一条命令。
+
+```sh
+dsh plugin --profile web add dsh-go-app@0.1.1
+```
+
+安装成功后，在 DSH Go 的「引擎」页重启本机引擎，让插件生效。[DSH Go 主机与安装指南](https://github.com/ccch1mneyyy/dsh-Go/blob/v1.0.13/docs/plugins/hosts.md)
+
+### 做第一个应用
+
+在 DSH Go 打开一个选了工作区的本机聊天，把下面这段话发给 Agent。
+
+> 用 dsh-go-app 做一个叫「随身跑记」的离线跑步计时器。能开始、暂停、结束计时，并保存记录。先给我手机桌面预览，等我确认再打包。
+
+1. 在同一台手机上点聊天里的「打开手机桌面预览」，再点 **随身跑记** 的图标。可以回到聊天继续提修改意见。
+2. 满意后在同一聊天里回复「确认打包」。首次构建可能需要确认下载 Android 工具和接受 SDK 许可，见[配置构建环境](#配置构建环境)。
+3. 打开 Agent 返回的 APK 文件卡或链接，按 Android 安装器的提示安装，再从手机桌面打开应用。
 
 ## 从想法到 APK
 
-「随身跑记」是用 DSH Go 在 Android 手机上构建并安装的原生跑步 App。这是当时给 DSH Go 的功能需求：
+下面是「随身跑记」的完整实战案例。它在 Android 手机上用 DSH Go 构建并安装，另外接入了 GPS 和 Health Connect。当时发给 DSH Go 的需求如下。
 
 > 直接在这台真机做一个中文原生 Android App「随身跑记」。需求：从 Health Connect 经用户授权读取今日总步数和最近跑步记录；用户点击开始后用手机 GPS 记录用时、距离和平均配速，结束后保存到本机并在 App 里查看。
 
@@ -19,23 +47,6 @@
 | <img src="docs/images/runlog-launcher.webp" width="230" alt="手机桌面预览上的橙色随身跑记图标"> | <img src="docs/images/runlog-preview.webp" width="230" alt="从桌面图标打开的随身跑记浏览器预览"> | <img src="docs/images/runlog-recording.webp" width="230" alt="随身跑记的跑步计时、距离、平均配速和轨迹"> |
 
 桌面预览由插件生成，点开的是原 APK 中的页面。浏览器预览中的健康数据是示例数据。安装后的跑步画面来自 Android 14 模拟器，轨迹使用模拟定位。Health Connect 和 GPS 由 DSH Go 在原生构建阶段接入，目前尚未接入插件模板。
-
-## 安装插件
-
-当前插件接口针对 DSH Go 1.0.13 自带的 DeepSeek Harness `0.2.2-rc.1`，需要 Node.js 24.9 或更新版本。在 DSH Go 的本机终端安装发布版本。
-
-```sh
-dsh plugin --profile web add dsh-go-app@0.1.1
-```
-
-开发版可从源码打包安装。若在电脑打包，先把 `.tgz` 文件传到手机。
-
-```sh
-npm pack
-dsh plugin --profile web add /absolute/path/to/dsh-go-app-0.1.1.tgz
-```
-
-安装后重启 DSH Go 的本机引擎。安装方法见 [DSH Go 插件指南](https://github.com/ccch1mneyyy/dsh-Go/blob/v1.0.13/docs/plugins/from-zero.md)。
 
 ## 配置构建环境
 
@@ -74,3 +85,15 @@ node "$PLUGIN/bin/dsh-go-app.js" configure \
 桌面图标预览会在模拟手机壁纸上显示 App 名称和圆角图标，点图标即可打开同一版本的应用预览。图标会打包为 Android 自适应图标，最终轮廓由设备的启动器决定。旧项目可以在原目录补上 `icon.json`，再预览和打包。
 
 插件使用 Android Activity 和 WebView 运行单文件 HTML、CSS、JavaScript，支持 `localStorage`。陀螺仪模板在前台采样，通过页面同源的 `GET /gyroscope.json` 提供 X/Y/Z 角速度（rad/s）和开机后的采样时间。GPS、Health Connect、通用 Gradle 项目和自动设备测试属于后续能力。生成 APK 使用本地开发签名，适合直接安装试用。
+
+## 从源码安装
+
+在仓库根目录执行 `npm pack`。若在电脑上打包，先把生成的 `.tgz` 文件传到手机，再在 DSH Go 的本机终端运行下列命令。把路径和文件名换成实际的打包结果。
+
+```sh
+dsh plugin --profile web add /absolute/path/to/dsh-go-app-0.1.1.tgz
+```
+
+安装后重启 DSH Go 的本机引擎。[DSH Go 插件开发指南](https://github.com/ccch1mneyyy/dsh-Go/blob/v1.0.13/docs/plugins/from-zero.md)
+
+**开发预览。** 已验证桌面 Harness 加载插件和签名构建，以及 Android 模拟器覆盖安装后保留应用数据。另在一台 Android 16 真机上通过 DSH Go 完成了陀螺仪模板选择、页面生成、预览、签名、安装和实时采样。
