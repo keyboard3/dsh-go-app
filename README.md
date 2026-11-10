@@ -4,13 +4,21 @@
 
 **开发预览**。已验证桌面 Harness 加载插件和签名构建，以及 Android 模拟器覆盖安装后保留应用数据。另在一台 Android 16 真机上通过 DSH Go 完成了陀螺仪模板选择、页面生成、预览、签名、安装和实时采样。
 
-## 真机演示
+## 从想法到 APK
 
-下图是 Android 16 真机上的「喝水打卡」浏览器预览。使用开发版插件，在 DSH Go 聊天里点 **打开手机桌面预览**，再点桌面上的水滴图标进入应用。
+「随身跑记」是用 DSH Go 在 Android 手机上构建并安装的原生跑步 App。这是当时给 DSH Go 的功能需求：
 
-| 手机桌面预览 | 点图标进入应用 |
-| --- | --- |
-| <img src="docs/images/water-checkin-launcher.webp" width="280" alt="模拟手机桌面上的喝水打卡水滴图标"> | <img src="docs/images/water-checkin-app.webp" width="280" alt="点击水滴图标后打开的喝水打卡应用预览"> |
+> 直接在这台真机做一个中文原生 Android App「随身跑记」。需求：从 Health Connect 经用户授权读取今日总步数和最近跑步记录；用户点击开始后用手机 GPS 记录用时、距离和平均配速，结束后保存到本机并在 App 里查看。
+
+1. 先请 DSH Go 用插件预览「随身跑记」的离线界面。打开手机桌面预览，点橙色的 **随身跑记** 图标进入应用预览。
+2. 确认界面后，在同一 DSH Go 会话里要求 **用 Android SDK 构建并签名随身跑记的原生 APK**。打开 APK，在 Android 安装器确认安装。
+3. 打开随身跑记，按系统提示授权后开始跑步。结束时保存记录，可以回看用时、距离、平均配速和轨迹。
+
+| 手机桌面预览 | 点图标进入应用预览 | 安装后记录跑步 |
+| --- | --- | --- |
+| <img src="docs/images/runlog-launcher.webp" width="230" alt="手机桌面预览上的橙色随身跑记图标"> | <img src="docs/images/runlog-preview.webp" width="230" alt="从桌面图标打开的随身跑记浏览器预览"> | <img src="docs/images/runlog-recording.webp" width="230" alt="随身跑记的跑步计时、距离、平均配速和轨迹"> |
+
+桌面预览由插件生成，点开的是原 APK 中的页面。浏览器预览中的健康数据是示例数据。安装后的跑步画面来自 Android 14 模拟器，轨迹使用模拟定位。Health Connect 和 GPS 由 DSH Go 在原生构建阶段接入，目前尚未接入插件模板。
 
 ## 安装插件
 
@@ -56,9 +64,7 @@ node "$PLUGIN/bin/dsh-go-app.js" configure \
 
 `dsh_app_android_docs` 先从 `developer.android.com` 读取 API 参考。访问失败或正文缺少目标声明时，再尝试 `developer.android.google.cn` 的同路径和锚点，并返回实际来源。为插件项目传入 `projectId`，可以用当前构建 SDK 的 `android.jar` 核对平台 API 签名。AndroidX 用法按项目解析出的依赖版本核对，权限和运行条件查对应的官方文档。
 
-## 从想法到 APK
-
-在有工作目录的 DSH Go 会话中输入「做一个能保存计数的 App。我看完预览，再打成 APK。」
+## 插件工作流
 
 1. Harness 先用 `dsh_app_doctor` 检查所需能力，再创建 `dsh-apps/<项目 ID>/`，生成 `index.html` 和桌面图标 `icon.json`。需要三轴陀螺仪时，声明 `gyroscope` 就会选中 `gyroscope-webview`，由 Android 原生读取角速度，WebView 显示数据。相机、定位和 Health Connect 等会列为当前模板不支持的能力。
 2. 在 Harness 聊天里点「打开手机桌面预览」，再点 App 图标进入应用。没有图标的项目会直接提供应用预览入口。使用 DSH Go 的本机引擎时，请在这台手机上打开。看完后回复修改意见或确认打包。链接有效期为 15 分钟，过期后回复「刷新预览」。陀螺仪的实时数据与硬件可用性可在目标设备安装 APK 后验证。
