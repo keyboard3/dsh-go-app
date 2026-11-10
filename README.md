@@ -25,7 +25,7 @@
 当前插件接口针对 DSH Go 1.0.13 自带的 DeepSeek Harness `0.2.2-rc.1`，需要 Node.js 24.9 或更新版本。在 DSH Go 的本机终端安装发布版本。
 
 ```sh
-dsh plugin --profile web add dsh-go-app@0.1.0
+dsh plugin --profile web add dsh-go-app@0.1.1
 ```
 
 开发版可从源码打包安装。若在电脑打包，先把 `.tgz` 文件传到手机。
