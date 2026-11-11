@@ -8,7 +8,7 @@
 
 ### 安装插件
 
-插件还在等待 DSH Go 市场收录，现阶段可以直接安装 npm 的发布包。[查看上架进度](https://github.com/ccch1mneyyy/dsh-go-market/pull/39)
+插件已发布到 npm。如果在 DSH Go 的插件市场暂时搜不到，可以先用下面的命令安装。
 
 把下面这条命令发给 DSH Go 本机聊天里的 Agent，请它执行。也可以在 DSH Go 的本机终端直接运行。弹出审批时，核对命令后选「仅允许一次」。
 
