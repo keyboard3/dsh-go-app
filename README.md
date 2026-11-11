@@ -1,6 +1,6 @@
-# dsh-go-app
+# dsh-go-android-app
 
-`dsh-go-app` 是给 DSH Go 的 DeepSeek Harness 用的插件。把想做的 Android 应用告诉 Agent，先在手机上点图标预览，确认后生成签名 APK。装好的应用可以从手机桌面独立打开。
+`dsh-go-android-app` 是给 DSH Go 的 DeepSeek Harness 用的插件。把想做的 Android 应用告诉 Agent，先在手机上点图标预览，确认后生成签名 APK。装好的应用可以从手机桌面独立打开。
 
 ## 快速开始
 
@@ -8,25 +8,21 @@
 
 ### 安装插件
 
-插件还在等待 DSH Go 市场收录，现阶段通过 npm 安装。[查看上架进度](https://github.com/ccch1mneyyy/dsh-go-market/pull/39)
+插件还在等待 DSH Go 市场收录，现阶段可以直接安装 npm 的发布包。[查看上架进度](https://github.com/ccch1mneyyy/dsh-go-market/pull/39)
 
-**让 Agent 安装。** 在 DSH Go 的本机聊天中发送下面这段话。若弹出命令执行或联网的确认，按提示批准。
-
-> 请在当前手机的 DSH Go 本机环境中执行 `dsh plugin --profile web add dsh-go-app@0.1.1`。安装完成后告诉我，我来重启本机引擎。
-
-**手动安装。** 如果 Agent 无法执行命令，打开 DSH Go 的本机终端，运行同一条命令。
+把下面这条命令发给 DSH Go 本机聊天里的 Agent，请它执行。也可以在 DSH Go 的本机终端直接运行。弹出审批时，核对命令后选「仅允许一次」。
 
 ```sh
-dsh plugin --profile web add dsh-go-app@0.1.1
+dsh plugin --profile web add https://registry.npmjs.org/dsh-go-android-app/-/dsh-go-android-app-0.1.1.tgz
 ```
 
 安装成功后，在 DSH Go 的「引擎」页重启本机引擎，让插件生效。[DSH Go 主机与安装指南](https://github.com/ccch1mneyyy/dsh-Go/blob/v1.0.13/docs/plugins/hosts.md)
 
 ### 做第一个应用
 
-在 DSH Go 打开一个选了工作区的本机聊天，把下面这段话发给 Agent。
+在 DSH Go 新开一个本机聊天，选择工作区，然后直接说你想做什么。
 
-> 用 dsh-go-app 做一个叫「随身跑记」的离线跑步计时器。能开始、暂停、结束计时，并保存记录。先给我手机桌面预览，等我确认再打包。
+> 我想做一个叫「随身跑记」的跑步计时器。能开始、暂停和结束计时，并记住每次跑了多久。
 
 1. 在同一台手机上点聊天里的「打开手机桌面预览」，再点 **随身跑记** 的图标。可以回到聊天继续提修改意见。
 2. 满意后在同一聊天里回复「确认打包」。首次构建可能需要确认下载 Android 工具和接受 SDK 许可，见[配置构建环境](#配置构建环境)。
@@ -57,15 +53,15 @@ DSH Go 的 ARM64 PRoot 环境如果使用 glibc 2.38 或更新版本，可以在
 也可以在 DSH Go 终端提前配置。默认 DSH Home 是 `~/.dsh`，如果你的安装位置不同，请调整 `PLUGIN`。
 
 ```sh
-PLUGIN="${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/dsh-go-app"
-node "$PLUGIN/bin/dsh-go-app.js" setup --accept-android-sdk-license
-node "$PLUGIN/bin/dsh-go-app.js" doctor
+PLUGIN="${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/dsh-go-android-app"
+node "$PLUGIN/bin/dsh-go-android-app.js" setup --accept-android-sdk-license
+node "$PLUGIN/bin/dsh-go-android-app.js" doctor
 ```
 
 已有工具链时，可用 `configure` 指定实际路径。需要 JDK 17 或更新版本、Android API 34 的 `android.jar`、本机架构的 `aapt2` 和 `zipalign`，以及 `d8.jar` 和 `apksigner.jar`。
 
 ```sh
-node "$PLUGIN/bin/dsh-go-app.js" configure \
+node "$PLUGIN/bin/dsh-go-android-app.js" configure \
   /path/to/jdk /path/to/build-tools-bin /path/to/android.jar /path/to/tool-jars
 ```
 
@@ -91,9 +87,20 @@ node "$PLUGIN/bin/dsh-go-app.js" configure \
 在仓库根目录执行 `npm pack`。若在电脑上打包，先把生成的 `.tgz` 文件传到手机，再在 DSH Go 的本机终端运行下列命令。把路径和文件名换成实际的打包结果。
 
 ```sh
-dsh plugin --profile web add /absolute/path/to/dsh-go-app-0.1.1.tgz
+dsh plugin --profile web add /absolute/path/to/dsh-go-android-app-0.1.1.tgz
 ```
 
 安装后重启 DSH Go 的本机引擎。[DSH Go 插件开发指南](https://github.com/ccch1mneyyy/dsh-Go/blob/v1.0.13/docs/plugins/from-zero.md)
+
+## 从旧名称迁移
+
+旧包名是 `dsh-go-app`。在 DSH Go 本机终端移除旧包，再安装新包，然后重启本机引擎。
+
+```sh
+dsh plugin --profile web remove dsh-go-app
+dsh plugin --profile web add https://registry.npmjs.org/dsh-go-android-app/-/dsh-go-android-app-0.1.1.tgz
+```
+
+继续使用原工作区里的项目即可。新包沿用 `~/.local/share/dsh-go-app/` 中的工具链配置和签名密钥，以及 `DSH_GO_APP_HOME` 等已有环境变量，便于继续构建和覆盖安装已有应用。
 
 **开发预览。** 已验证桌面 Harness 加载插件和签名构建，以及 Android 模拟器覆盖安装后保留应用数据。另在一台 Android 16 真机上通过 DSH Go 完成了陀螺仪模板选择、页面生成、预览、签名、安装和实时采样。

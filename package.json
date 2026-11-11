@@ -1,5 +1,5 @@
 {
-  "name": "dsh-go-app",
+  "name": "dsh-go-android-app",
   "version": "0.1.1",
   "description": "Build standalone Android apps from a phone with DeepSeek Harness.",
   "license": "MIT",
@@ -10,7 +10,7 @@
     "./package.json": "./package.json",
     "./cordis.patch.yml": "./cordis.patch.yml"
   },
-  "bin": { "dsh-go-app": "./bin/dsh-go-app.js" },
+  "bin": { "dsh-go-android-app": "./bin/dsh-go-android-app.js" },
   "files": ["lib", "bin", "cordis.patch.yml"],
   "engines": { "node": ">=24.9.0", "dsh": "0.2.2-rc.1" },
   "peerDependencies": {
@@ -21,7 +21,7 @@
   "keywords": ["dsh-plugin", "dsh-bundle", "android", "apk"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/keyboard3/dsh-go-app.git"
+    "url": "git+https://github.com/keyboard3/dsh-go-android-app.git"
   },
   "dsh": { "bundle": { "patch": "./cordis.patch.yml" } }
 }

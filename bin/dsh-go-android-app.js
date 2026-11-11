@@ -3,12 +3,12 @@ import { buildApk, configureToolchain } from '../lib/android.js'
 import { createPreviewManager, createProject, readProject } from '../lib/project.js'
 import { inspectToolchain, setupToolchain } from '../lib/setup.js'
 
-const help = `dsh-go-app doctor
-dsh-go-app setup --accept-android-sdk-license
-dsh-go-app configure JAVA_HOME SDK_TOOLS ANDROID_JAR TOOL_JARS
-dsh-go-app create PROJECT_ID "App name"
-dsh-go-app preview PROJECT_ID
-dsh-go-app build PROJECT_ID PREVIEW_SHA256`
+const help = `dsh-go-android-app doctor
+dsh-go-android-app setup --accept-android-sdk-license
+dsh-go-android-app configure JAVA_HOME SDK_TOOLS ANDROID_JAR TOOL_JARS
+dsh-go-android-app create PROJECT_ID "App name"
+dsh-go-android-app preview PROJECT_ID
+dsh-go-android-app build PROJECT_ID PREVIEW_SHA256`
 
 async function main() {
   const [command, ...args] = process.argv.slice(2)
