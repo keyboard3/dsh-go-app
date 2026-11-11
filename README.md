@@ -9,7 +9,7 @@
 把下面这条命令发给本机聊天里的 Agent，请它安装插件。也可以在 DSH Go 的本机终端运行。弹出审批时，核对命令后选「仅允许一次」。
 
 ```sh
-dsh plugin --profile web add https://registry.npmjs.org/dsh-go-android-app/-/dsh-go-android-app-0.1.1.tgz
+dsh plugin --profile web add https://registry.npmjs.org/dsh-go-android-app/-/dsh-go-android-app-0.1.2.tgz
 ```
 
 安装成功后，在 DSH Go 的「引擎」页重启本机引擎。

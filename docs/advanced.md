@@ -8,7 +8,7 @@
 
 ## 配置构建环境
 
-DSH Go 的 ARM64 PRoot 环境如果使用 glibc 2.38 或更新版本，可以在第一次确认构建时自动配置。请使用能显示审批提示的会话权限，例如「工作区内修改」。确认框会提示下载缺少的工具并接受 [Android SDK 许可](https://developer.android.com/studio/terms)。
+DSH Go 的 ARM64 PRoot 环境如果使用 glibc 2.38 或更新版本，可以在第一次构建时自动配置。下载缺少的工具和接受 [Android SDK 许可](https://developer.android.com/studio/terms) 需要单独审批，因此这次初始化请使用能显示审批提示的会话权限，例如「工作区内修改」。已有构建环境时，普通打包遵循当前会话权限；用户查看预览并在聊天中确认后，插件不会额外弹出第二次确认框，其他会话权限要求仍然有效。
 
 插件会复用已有的 JDK 和 SDK，从固定的上游地址补齐缺少的组件。空环境首次下载约 330 MB。安装前验证下载大小和 SHA-256，试编译并验证一个临时 APK 后保存配置。以后构建复用已配置的工具。[工具链清单](../lib/toolchain-sources.json)
 
@@ -37,7 +37,7 @@ node "$PLUGIN/bin/dsh-go-android-app.js" configure \
 
 1. Harness 先用 `dsh_app_doctor` 检查所需能力，再创建 `dsh-apps/<项目 ID>/`，生成 `index.html` 和桌面图标 `icon.json`。需要三轴陀螺仪时，声明 `gyroscope` 就会选中 `gyroscope-webview`，由 Android 原生读取角速度，WebView 显示数据。相机、定位和 Health Connect 等会列为当前模板不支持的能力。
 2. 在 Harness 聊天里点「打开手机桌面预览」，再点 App 图标进入应用。没有图标的项目会直接提供应用预览入口。使用 DSH Go 的本机引擎时，请在这台手机上打开。看完后回复修改意见或确认打包。链接有效期为 15 分钟，过期后回复「刷新预览」。陀螺仪的实时数据与硬件可用性可在目标设备安装 APK 后验证。
-3. 确认打包后，插件检查页面、图标和模板是否与预览一致，构建并验证 APK。如果当前会话禁止弹出审批，切换到「工作区内修改」等会显示审批提示的模式再试。有 `present` 时，在聊天里点 APK 文件卡打开 Android 安装器。其他客户端可使用返回的文件链接。
+3. 在聊天中确认打包后，插件检查页面、图标和模板是否与有效预览一致，按当前会话权限构建并验证 APK。已有工具链时，插件不追加审批；若需要自动下载缺失工具，会单独请求一次性配置和 SDK 许可审批。仅在该初始化路径且当前会话禁止弹出审批时，返回 `TOOLCHAIN_SETUP_APPROVAL_REQUIRED`，可切换到能审批的会话完成初始化，或提前配置已有工具链。有 `present` 时，在聊天里点 APK 文件卡打开 Android 安装器。其他客户端可使用返回的文件链接。
 4. 要更新应用，继续使用原项目。保留 `app.json`、`dist/` 和原签名密钥，插件会递增版本号并使用同一包名和签名，支持覆盖安装。
 
 桌面图标预览会在模拟手机壁纸上显示 App 名称和圆角图标，点图标即可打开同一版本的应用预览。图标会打包为 Android 自适应图标，最终轮廓由设备的启动器决定。旧项目可以在原目录补上 `icon.json`，再预览和打包。
@@ -49,7 +49,7 @@ node "$PLUGIN/bin/dsh-go-android-app.js" configure \
 在仓库根目录执行 `npm pack`。若在电脑上打包，先把生成的 `.tgz` 文件传到手机，再在 DSH Go 的本机终端运行下列命令。把路径和文件名换成实际的打包结果。
 
 ```sh
-dsh plugin --profile web add /absolute/path/to/dsh-go-android-app-0.1.1.tgz
+dsh plugin --profile web add /absolute/path/to/dsh-go-android-app-0.1.2.tgz
 ```
 
 安装后重启 DSH Go 的本机引擎。[DSH Go 插件开发指南](https://github.com/ccch1mneyyy/dsh-Go/blob/v1.0.13/docs/plugins/from-zero.md)
@@ -60,7 +60,7 @@ dsh plugin --profile web add /absolute/path/to/dsh-go-android-app-0.1.1.tgz
 
 ```sh
 dsh plugin --profile web remove dsh-go-app
-dsh plugin --profile web add https://registry.npmjs.org/dsh-go-android-app/-/dsh-go-android-app-0.1.1.tgz
+dsh plugin --profile web add https://registry.npmjs.org/dsh-go-android-app/-/dsh-go-android-app-0.1.2.tgz
 ```
 
 继续使用原工作区里的项目即可。新包沿用 `~/.local/share/dsh-go-app/` 中的工具链配置和签名密钥，以及 `DSH_GO_APP_HOME` 等已有环境变量，便于继续构建和覆盖安装已有应用。
